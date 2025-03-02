@@ -10,6 +10,7 @@ import {
   getPermissionById,
   getPermissionNames,
 } from "../controllers/permission.controller.js";
+import { getUserPermission } from "../controllers/user.permissions.controller.js";
 
 const router = express.Router();
 
@@ -40,4 +41,5 @@ router.put(
   checkSuperAdmin,
   assignPermissionToRole
 );
+router.get("/get", verifyJWT, getUserPermission);
 export default router;

@@ -14,4 +14,5 @@ router.post("/login", login);
 router.put("/logout", verifyJWT, logout);
 router.post("/all", verifyJWT, getAllUsers);
 router.get("/:id", verifyJWT, getUserById);
+
 export default router;
