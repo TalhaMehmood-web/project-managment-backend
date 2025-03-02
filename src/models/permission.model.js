@@ -6,7 +6,7 @@ const permissionSchema = new mongoose.Schema(
     type: { type: String, enum: ["api", "page"], required: true },
     endpoint: { type: String }, // API route (if type = "api"), e.g., "/users"
     method: { type: String, enum: ["GET", "POST", "PUT", "DELETE", "PATCH"] },
-    controller: { type: String, required: true },
+    controller: { type: String },
     pagePath: { type: String }, // Frontend route (if type = "page"), e.g., "/dashboard"
     assignedToRoles: [
       {

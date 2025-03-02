@@ -8,10 +8,13 @@ import Role from "../models/role.model.js";
 export const fetchNotIdentifiedUsers = expressAsyncHandler(async (req, res) => {
   try {
     const { filters, page = 0, pageSize = 10 } = req.body;
-    const guestRoles = await Role.findOne({ name: ROLES.GUEST });
-    // Build filters for users with role NOT_IDENTIFIED
+
+    // Fetch the Super Admin role
+    const superAdminRole = await Role.findOne({ name: ROLES.SUPER_ADMIN });
+
+    // Build filters to exclude Super Admin users
     const filterQuery = buildQueryFilters(filters, {
-      role: guestRoles?._id,
+      role: { $ne: superAdminRole?._id }, // Exclude Super Admin
     });
 
     // Fetch paginated users excluding sensitive fields
@@ -21,14 +24,14 @@ export const fetchNotIdentifiedUsers = expressAsyncHandler(async (req, res) => {
       .skip(page * pageSize)
       .limit(pageSize)
       .lean();
-    console.log("users", users);
+
     // Count total users matching the filter
     const totalUsers = await User.countDocuments(filterQuery);
 
     // Determine if there is a next page
     const hasNextPage = (page + 1) * pageSize < totalUsers;
 
-    return sendResponse(res, 200, "Not Identified Users fetched successfully", {
+    return sendResponse(res, 200, "Users fetched successfully", {
       users,
       totalUsers,
       currentPage: page,
@@ -74,5 +77,49 @@ export const changeUserRole = expressAsyncHandler(async (req, res) => {
     });
   } catch (error) {
     return sendResponse(res, 500, error.message);
+  }
+});
+
+export const assignRole = expressAsyncHandler(async (req, res) => {
+  try {
+    const { userId, selectedRole } = req.body;
+
+    // 🔹 Validate request body
+    if (!userId || !selectedRole) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User ID and Role ID are required." });
+    }
+
+    // 🔹 Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
+    }
+
+    // 🔹 Find the role
+    const role = await Role.findById(selectedRole);
+    if (!role) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Role not found." });
+    }
+
+    // 🔹 Update user's role
+    user.role = role._id;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "User role updated successfully.",
+      user,
+    });
+  } catch (error) {
+    console.error("Error in assignRole API:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error." });
   }
 });

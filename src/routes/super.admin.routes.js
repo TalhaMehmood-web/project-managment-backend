@@ -1,5 +1,8 @@
 import express from "express";
-import { fetchNotIdentifiedUsers } from "../controllers/super.admin.controller.js";
+import {
+  assignRole,
+  fetchNotIdentifiedUsers,
+} from "../controllers/super.admin.controller.js";
 import verifyJWT from "../middlewares/auth.middleware.js";
 import checkSuperAdmin from "../middlewares/checkSuperAdmin.middleware.js";
 const router = express.Router();
@@ -10,5 +13,5 @@ router.post(
   checkSuperAdmin,
   fetchNotIdentifiedUsers
 );
-
+router.patch("/assign-role", verifyJWT, checkSuperAdmin, assignRole);
 export default router;

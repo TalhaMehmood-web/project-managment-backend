@@ -1,9 +1,6 @@
 import User from "../models/user.model.js";
 import asyncHandler from "express-async-handler";
 import { sendResponse } from "../utils/response-handler/index.js";
-import Notification from "../models/notification.model.js";
-import { io } from "../configs/socket.js";
-import { getReceiverSocketId } from "../configs/socket.js";
 import { createAndSendNotification } from "../utils/notification.js";
 export const verifyUser = asyncHandler(async (req, res) => {
   try {
@@ -87,5 +84,19 @@ export const blockUser = asyncHandler(async (req, res) => {
     return sendResponse(res, 200, "User blocked successfully");
   } catch (error) {
     return sendResponse(res, 500, error.message);
+  }
+});
+export const getUserPermission = asyncHandler(async (req, res) => {
+  try {
+    console.log("🔹 User object in controller:", req.user);
+
+    if (!req.user) {
+      return res.status(401).json({ message: "User not found in request" });
+    }
+
+    return res.json({ permissions: req.user.permissions });
+  } catch (error) {
+    console.log("❌ Error in getUserPermission:", error);
+    return res.status(500).json({ message: error.message });
   }
 });

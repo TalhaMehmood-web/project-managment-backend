@@ -63,7 +63,9 @@ export const register = asyncHandler(async (req, res) => {
     if (email.toString().trim() === process.env.SUPER_ADMIN_EMAIL) {
       const superAdminRole = await Role.findOne({ name: "super_admin" });
       if (!superAdminRole) {
-        return sendResponse(res, 404, "Super Admin role not found.");
+        userRole = await Role.create({
+          name: ROLES.SUPER_ADMIN,
+        });
       }
       userRole = superAdminRole._id;
     }
@@ -141,6 +143,7 @@ export const login = asyncHandler(async (req, res) => {
     }
 
     const user = await User.findOne({ email }).populate("role", "name");
+
     if (!user) {
       return sendResponse(res, 404, "User with this email is not found!");
     }
