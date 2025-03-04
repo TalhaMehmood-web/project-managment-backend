@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import buildQueryFilters from "../utils/build-query-filters/index.js";
 import Role from "../models/role.model.js";
+import User from "../models/user.model.js";
 
 const formatFileName = (fileName) => {
   return (
@@ -270,4 +271,47 @@ export const assignPermissionToRole = expressAsyncHandler(async (req, res) => {
       .status(500)
       .json({ message: "Server error", error: error.message });
   }
+});
+export const assignPermissionToUser = expressAsyncHandler(async (req, res) => {
+  const { userId, roleId, permissionIds } = req.body;
+
+  // Find the user and role
+  const user = await User.findById(userId);
+  if (!user) return sendResponse(res, 404, "User with this Id is not found");
+
+  const role = await Role.findById(roleId);
+  if (!role) return sendResponse(res, 404, "Role with this id not found");
+
+  // Normalize permissionIds to an array, in case a single id is passed.
+  const permissionsToToggle = Array.isArray(permissionIds)
+    ? permissionIds
+    : [permissionIds];
+
+  // Loop through each permission id
+  permissionsToToggle.forEach((permissionId) => {
+    // Only process if the permission is not already provided by the role
+    if (!role.permissions.includes(permissionId)) {
+      // Check if the user already has this permission
+      const hasPermission = user.permissions.some(
+        (perm) => perm.toString() === permissionId.toString()
+      );
+      if (hasPermission) {
+        // Remove permission from user.permissions array
+        user.permissions = user.permissions.filter(
+          (perm) => perm.toString() !== permissionId.toString()
+        );
+      } else {
+        // Add permission to user.permissions array
+        user.permissions.push(permissionId);
+      }
+    }
+  });
+
+  await user.save();
+  return sendResponse(
+    res,
+    200,
+    "User permissions updated successfully",
+    user.permissions
+  );
 });
