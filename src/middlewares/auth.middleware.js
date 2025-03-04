@@ -43,7 +43,7 @@ const verifyJWT = async (req, res, next) => {
     const permissions = await Permission.find({
       _id: { $in: validPermissionIds },
     });
-    console.log("permissions", permissions);
+
     req.user = {
       _id: user._id,
       email: user.email,
@@ -68,7 +68,7 @@ const verifyJWT = async (req, res, next) => {
   } catch (error) {
     console.log("Error in verifyJWT:", error.message);
     res
-      .status(500)
+      .status(401)
       .json({ message: error?.message || "Internal Server Error" });
   }
 };

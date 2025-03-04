@@ -3,6 +3,7 @@ import verifyJWT from "../middlewares/auth.middleware.js";
 import checkSuperAdmin from "../middlewares/checkSuperAdmin.middleware.js";
 import {
   assignPermissionToRole,
+  assignPermissionToUser,
   createPermission,
   getAllAppRoutes,
   getAllPermissions,
@@ -41,5 +42,6 @@ router.put(
   checkSuperAdmin,
   assignPermissionToRole
 );
+router.put("/assign-permission-to-user", verifyJWT, assignPermissionToUser);
 router.get("/get", verifyJWT, getUserPermission);
 export default router;

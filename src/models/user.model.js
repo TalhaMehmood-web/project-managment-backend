@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema(
 
     // 🔗 Added role field referencing the Role model
     role: { type: mongoose.Schema.Types.ObjectId, ref: "Role" },
+    permissions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Permission" }],
   },
   { timestamps: true }
 );
